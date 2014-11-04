@@ -1,55 +1,52 @@
 var fs = require('fs');
 var xlsx = require('xlsx');
 var xls = require('xlsjs');
-var streamifier = require('streamifier');
-var EventEmitter = require('events').EventEmitter;
 
-function parse(config,callback){
+module.exports.parse = function(config,callback){
  config = config || {}; // Holds any config data if its passed in
  this.name = config.name || 'Untitled';
  this.sheet = config.sheet || '';
- this.error = null;
- this.data = new Array();
  this.delimiter = config.delimiter || ',';
 
  var me = this;
  var callbackfn = callback || null;
- var buf;
- var stream;
- var outputObj;
+ var buf = config.filebuffer || null;
  var filepath = config.filepath || '';
 
- if (filepath=='') {
-  throw new Error('No File Specified');
-  return;
+ if (filepath=='' && buf == null) {
+  if (callbackfn == null) {
+   throw new Error('No File Specified');
+  } else {
+   callbackfn(new Error('No File Specified'),null);
+  }
  }
 
- if (callbackfn == null) {
-  buf = fs.readFileSync(filepath);
-  return parseFile(buf);
+ if (callbackfn == null || !buf == null) {
+  if (buf==null) {
+   buf = fs.readFileSync(filepath);
+  }
+  return parseFile(buf,this.sheet,this.delimiter);
  } else {
-  fs.readFile('filepath', function (err, data) {
+  fs.readFile(filepath, function (err, data) {
     if (err) callbackfn(err,null);
-    console.log(typeof data);
-    callbackfn(null,parseFile(data));
+    callbackfn(null,parseFile(data,me.sheet,me.delimiter));
   });
  }
 };
 
 
-function parseFile(filebuf) {
+function parseFile(filebuf,sheetname,delimiter) {
  var retData;
 
- switch (buf.toString("base64",0,4)) {
+ switch (filebuf.toString("base64",0,4)) {
   case 'UEsDBA==':
-   retData = parseExcelObj(xlsx.read(buf),this.sheet);
+   retData = parseExcelObj(xlsx.read(filebuf),sheetname);
    break;
   case '0M8R4A==':
-   retData = parseExcelObj(xls.read(buf),this.sheet);
+   retData = parseExcelObj(xls.read(filebuf),sheetname);
    break;
   default:
-   retData = CSVToArray(buf.toString('ascii'));
-   callbackfn();
+   retData = CSVToArray(filebuf.toString('ascii'),delimiter);
  }
  return retData;
 }
@@ -189,7 +186,3 @@ function CSVToArray( strData, strDelimiter ){
 	// Return the parsed data.
 	return( arrData );
 }
-
-
-require('util').inherits(MyClass, EventEmitter);
-module.exports = parse;
