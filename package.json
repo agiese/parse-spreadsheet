@@ -2,8 +2,6 @@
   "name": "parsespreatsheet",
   "version": "0.0.1",
   "dependencies": {
-    "fast-csv": "^0.5.3",
-    "streamifier": "^0.1.0",
     "xlsjs": "^0.7.1",
     "xlsx": "^0.7.12"
   }

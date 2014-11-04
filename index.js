@@ -4,7 +4,7 @@ var xls = require('xlsjs');
 var streamifier = require('streamifier');
 var EventEmitter = require('events').EventEmitter;
 
-var MyClass = function(config){
+function parse(config,callback){
  config = config || {}; // Holds any config data if its passed in
  this.name = config.name || 'Untitled';
  this.sheet = config.sheet || '';
@@ -13,41 +13,46 @@ var MyClass = function(config){
  this.delimiter = config.delimiter || ',';
 
  var me = this;
- var callbackfn;
+ var callbackfn = callback || null;
  var buf;
  var stream;
  var outputObj;
  var filepath = config.filepath || '';
 
- this.parse = function(callback) {
-  callbackfn=callback;
-  if (filepath=='') {
-   this.error='No File Specified';
-   this.emit('error');
-   return;
-  }
-  try {
-   buf = fs.readFileSync(filepath);
-  } catch (e) {
-   this.error='Invalid Filename';
-   this.emit('error');
-  }
-  switch (buf.toString("base64",0,4)) {
-   case 'UEsDBA==':
-    this.data = parseExcelObj(xlsx.read(buf),this.sheet);
-    callbackfn();
-    break;
-   case '0M8R4A==':
-    this.data = parseExcelObj(xls.read(buf),this.sheet);
-    callbackfn();
-    break;
-   default:
-    this.data = CSVToArray(buf.toString('ascii'));
-    callbackfn();
-  }
- };
+ if (filepath=='') {
+  throw new Error('No File Specified');
+  return;
+ }
+
+ if (callbackfn == null) {
+  buf = fs.readFileSync(filepath);
+  return parseFile(buf);
+ } else {
+  fs.readFile('filepath', function (err, data) {
+    if (err) callbackfn(err,null);
+    console.log(typeof data);
+    callbackfn(null,parseFile(data));
+  });
+ }
 };
 
+
+function parseFile(filebuf) {
+ var retData;
+
+ switch (buf.toString("base64",0,4)) {
+  case 'UEsDBA==':
+   retData = parseExcelObj(xlsx.read(buf),this.sheet);
+   break;
+  case '0M8R4A==':
+   retData = parseExcelObj(xls.read(buf),this.sheet);
+   break;
+  default:
+   retData = CSVToArray(buf.toString('ascii'));
+   callbackfn();
+ }
+ return retData;
+}
 
 
 function parseExcelObj(obj,sheetname) {
@@ -187,4 +192,4 @@ function CSVToArray( strData, strDelimiter ){
 
 
 require('util').inherits(MyClass, EventEmitter);
-module.exports = MyClass;
+module.exports = parse;
