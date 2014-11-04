@@ -1,7 +1,7 @@
 parse-spreadsheet
 =================
 
-For use in node.js.
+For use in node.js.  Run "npm install" to download the dependencies.
 
 Easily parse a spreadsheet of .xls, .xlsx, .ods, .csv or .txt format either synchronously or asynchronously and return a matrix of string values corresponding to the table cell values.
 
