@@ -1,6 +1,7 @@
 {
   "name": "parsespreatsheet",
   "version": "0.0.1",
+  "main": "./index",
   "dependencies": {
     "xlsjs": "^0.7.1",
     "xlsx": "^0.7.12"
