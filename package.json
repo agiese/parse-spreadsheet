@@ -4,5 +4,9 @@
   "dependencies": {
     "xlsjs": "^0.7.1",
     "xlsx": "^0.7.12"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://www.github.com/agiese/parse-spreadsheet"
   }
 }
